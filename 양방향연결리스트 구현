@@ -70,15 +70,10 @@ class DoublyLinkedList:
 		self.insertBefore(self.head, key)
 		
 	def deleteNode(self, x):
-		if x == None or x == self.head:
+		if x == None or self.isEmpty():
 			return
-		elif x == self.head:
-			x = x.next
-		xp = x.prev
-		xn = x.next
-		xp.next = xn
-		xn.prev = xp
-		del x
+		x.prev.next = x.next
+		x.next.prev = x.prev
 			
 	def popFront(self):
 		if self.isEmpty():
@@ -96,12 +91,14 @@ class DoublyLinkedList:
 		return key
 	
 	def search(self, key):
-		v = self.head.next
-		while v != self.head:
-			if v.key == key:
-				return v
-			v = v.next
-		return None
+		if self.isEmpty():
+			return
+		n = self.head.next
+		while n !=self.head:
+			if n.key == key:
+				return n
+			n = n.next
+		return 
 		
 	def first(self):
 		x = self.head
@@ -112,7 +109,7 @@ class DoublyLinkedList:
 		return x.prev
 	
 	def isEmpty(self):
-		return None
+		return self.head.next == self.head
 	
 	def findMax(self):
 		if not self.head:
@@ -126,13 +123,11 @@ class DoublyLinkedList:
 		return max_node
 		
 	def deleteMax(self):
-		if self.head == Node():
-			return None
-		else:
-			max_node = self.findMax()
-			max_key = max_node.key
-			self.deleteNode(max_node)
-			return max_key
+		if self.isEmpty():
+			return
+		max_v = self.findMax()
+		self.deleteNode(self.search(max_v))
+		return max_node		
 	
 	def sort(self):
 		sorted_list = DoublyLinkedList()
