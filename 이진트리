@@ -17,13 +17,26 @@ preorder(v), postorder(v): 각각 v의 preorder와 postorder의 방문 시간을
 lca(u, v): u와 v의 LCA(Lowest Common Ancestor) 노드 번호를 리턴
 '''
 def preorder(v):
-    
+    result = [self.key]
+    if self.left:
+        result += self.left.preorder()
+    if self.right:
+        result += self.right.preorder()
+    return result
 
 def postorder(v):
-    
+    result = []
+    if self.left:
+        result += self.left.postorder()
+    if self.right:
+        result += self.right.postorder()
+    result.append(self.key)
+    return result
 
 def depth(v):
-    
+    if self.parent != None:
+        return 0
+       return self.parent.depth() + 1
 
 def is_ancestor(u, v):
     
