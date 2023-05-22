@@ -16,39 +16,136 @@ depth(v): v의 깊이를 리턴(루트노드의 깊이는 0이고, 레벨이 하
 preorder(v), postorder(v): 각각 v의 preorder와 postorder의 방문 시간을 리턴(루트노드의 방문 시간은 1로 가정)
 lca(u, v): u와 v의 LCA(Lowest Common Ancestor) 노드 번호를 리턴
 '''
+
+# preorder, postorder 빼고는 다 맞음
+class Node:
+    def __init__(self, key):
+        self.key = key
+        self.parent = None
+        self.left = None
+        self.right = None
+
+    def __str__(self):
+        return str(self.key)
+
+    def preorder(self):
+        node = nodes[self.key]
+        traversal=[]
+        def traverse(node):
+            if node == None:
+                return
+            traversal.append(node.key)
+            traverse(node.left)
+            traverse(node.right)
+        traverse(node)
+        return traversal
+
+    def postorder(self):
+        node = nodes[self.key]
+        traversal=[]
+				
+        def traverse(node):
+            if node == None:
+                return
+            traverse(node.left)
+            traverse(node.right)
+            traversal.append(node.key)
+        traverse(node)
+        return traversal
+            
+    def depth(self):
+        if self.parent is None:
+            return 0
+        return self.parent.depth() + 1
+
+    def is_ancestor(self, u, v):
+        node_u = self.find_node(u)
+        node_v = self.find_node(v)
+        if node_u == None or node_v == None:
+            return False
+        
+        ancestors = set()
+        while node_u:
+            ancestors.add(node_u)
+            node_u = node_u.parent
+        while node_v:
+            if node_v in ancestors:
+                return True
+            node_v = node_v.parent
+        return False
+
+    def find_node(self, key):
+        if self == None:
+            return None
+        if self.key == key:
+            return self
+        left_result = self.left.find_node(key) if self.left else None
+        if left_result:
+            return left_result
+        right_result = self.right.find_node(key) if self.right else None
+        if right_result:
+            return right_result
+        return None
+
+    def lca(self, u, v):
+        if self == None:
+            return None
+        if self.key == u or self.key == v:
+            return self
+        left_lca = self.left.lca(u, v) if self.left else None
+        right_lca = self.right.lca(u, v) if self.right else None
+        if left_lca and right_lca:
+            return self
+        if left_lca:
+            return left_lca
+        if right_lca:
+            return right_lca
+        return None
+
+
+n = int(input())  # 노드의 개수
+
+nodes = {}
+for i in range(1, n+1):
+    nodes[i] = Node(i)
+
+for i in range(n):
+    node_info = list(map(int, input().split()))
+    v = node_info[0]
+    left_child = node_info[1]
+    right_child = node_info[2]
+
+    node = nodes[v]
+    if left_child != 0:
+        node.left = nodes[left_child]
+        nodes[left_child].parent = node
+    if right_child != 0:
+        node.right = nodes[right_child]
+        nodes[right_child].parent = node
+
+
 def preorder(v):
-    result = [self.key]
-    if self.left:
-        result += self.left.preorder()
-    if self.right:
-        result += self.right.preorder()
-    return result
-
+    return nodes[v].preorder()
 def postorder(v):
-    result = []
-    if self.left:
-        result += self.left.postorder()
-    if self.right:
-        result += self.right.postorder()
-    result.append(self.key)
-    return result
-
+    return nodes[v].postorder()
 def depth(v):
-    if self.parent != None:
-        return 0
-       return self.parent.depth() + 1
-
+    return nodes[v].depth()
 def is_ancestor(u, v):
-    
-
+    return nodes[u].is_ancestor(u, v)
 def lca(u, v):
-    
+    node_u = nodes[u]
+    node_v = nodes[v]
+    while node_u != node_v:
+        if node_u.depth() > node_v.depth():
+            node_u = node_u.parent
+        elif node_u.depth() < node_v.depth():
+            node_v = node_v.parent
+        else:
+            node_u = node_u.parent
+            node_v = node_v.parent
+    return node_u.key
 
-# 입력 처리 부분
 
-# 전처리 코드 부분
-
-# 수정하지 않고 그대로 사용하기
 while True:
     cmd = input().split()
     if cmd[0] == 'exit':
