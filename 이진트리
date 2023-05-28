@@ -17,152 +17,119 @@ preorder(v), postorder(v): 각각 v의 preorder와 postorder의 방문 시간을
 lca(u, v): u와 v의 LCA(Lowest Common Ancestor) 노드 번호를 리턴
 '''
 
-# preorder, postorder 빼고는 다 맞음
-class Node:
-    def __init__(self, key):
-        self.key = key
-        self.parent = None
-        self.left = None
-        self.right = None
-
-    def __str__(self):
-        return str(self.key)
-
-    def preorder(self):
-        node = nodes[self.key]
-        traversal=[]
-        def traverse(node):
-            if node == None:
-                return
-            traversal.append(node.key)
-            traverse(node.left)
-            traverse(node.right)
-        traverse(node)
-        return traversal
-
-    def postorder(self):
-        node = nodes[self.key]
-        traversal=[]
-				
-        def traverse(node):
-            if node == None:
-                return
-            traverse(node.left)
-            traverse(node.right)
-            traversal.append(node.key)
-        traverse(node)
-        return traversal
-            
-    def depth(self):
-        if self.parent is None:
-            return 0
-        return self.parent.depth() + 1
-
-    def is_ancestor(self, u, v):
-        node_u = self.find_node(u)
-        node_v = self.find_node(v)
-        if node_u == None or node_v == None:
-            return False
-        
-        ancestors = set()
-        while node_u:
-            ancestors.add(node_u)
-            node_u = node_u.parent
-        while node_v:
-            if node_v in ancestors:
-                return True
-            node_v = node_v.parent
-        return False
-
-    def find_node(self, key):
-        if self == None:
-            return None
-        if self.key == key:
-            return self
-        left_result = self.left.find_node(key) if self.left else None
-        if left_result:
-            return left_result
-        right_result = self.right.find_node(key) if self.right else None
-        if right_result:
-            return right_result
-        return None
-
-    def lca(self, u, v):
-        if self == None:
-            return None
-        if self.key == u or self.key == v:
-            return self
-        left_lca = self.left.lca(u, v) if self.left else None
-        right_lca = self.right.lca(u, v) if self.right else None
-        if left_lca and right_lca:
-            return self
-        if left_lca:
-            return left_lca
-        if right_lca:
-            return right_lca
-        return None
-
-
-n = int(input())  # 노드의 개수
-
-nodes = {}
-for i in range(1, n+1):
-    nodes[i] = Node(i)
-
-for i in range(n):
-    node_info = list(map(int, input().split()))
-    v = node_info[0]
-    left_child = node_info[1]
-    right_child = node_info[2]
-
-    node = nodes[v]
-    if left_child != 0:
-        node.left = nodes[left_child]
-        nodes[left_child].parent = node
-    if right_child != 0:
-        node.right = nodes[right_child]
-        nodes[right_child].parent = node
-
-
 def preorder(v):
-    return nodes[v].preorder()
+    cnt = 0
+    stack = []  # Stack
+
+    stack.append(root)  # Push root
+    while len(stack) > 0:
+        parent = stack.pop()
+        cnt += 1
+        if parent == v:
+            return cnt
+
+        if right[parent] != 0:
+            stack.append(right[parent])
+        if left[parent] != 0:
+            stack.append(left[parent])
+
+
 def postorder(v):
-    return nodes[v].postorder()
+    cnt = -1
+    stack = []  # Stack
+    res = []  # Output stack
+
+    stack.append(root)
+    while len(stack) > 0:
+        node = stack.pop()
+        cnt += 1
+        if node == v:
+            return n - cnt
+
+        res.append(node)
+        if left[node] != 0:
+            stack.append(left[node])
+        if right[node] != 0:
+            stack.append(right[node])
+						
+
 def depth(v):
-    return nodes[v].depth()
+    ancestors_v = get_ancestors(v)
+    return len(ancestors_v) - 1
+
+
 def is_ancestor(u, v):
-    return nodes[u].is_ancestor(u, v)
+    ancestors_v = get_ancestors(v)
+    if u in ancestors_v:
+        return True
+    return False
+
+
 def lca(u, v):
-    node_u = nodes[u]
-    node_v = nodes[v]
-    while node_u != node_v:
-        if node_u.depth() > node_v.depth():
-            node_u = node_u.parent
-        elif node_u.depth() < node_v.depth():
-            node_v = node_v.parent
-        else:
-            node_u = node_u.parent
-            node_v = node_v.parent
-    return node_u.key
+    ancestors_u = get_ancestors(u)
+    ancestors_v = get_ancestors(v)
+    for ancestor_u in ancestors_u:
+        if ancestor_u in ancestors_v:
+            return ancestor_u
 
 
+def is_root(u):  # Node u가 루트인지 아닌지 판단
+    # 부모 노드가 없으면 루트
+    if parent[u] == 0:
+        return True
+    return False
+
+
+def get_ancestors(v):  # 노드 v와 그의 조상을 모두 찾아서 반환함
+    ancestors_list = []  # v의 조상을 모두 저장하는 리스트
+    i = v
+    while i != 0:  # i가 루트에 도달할 때까지 반복
+        ancestors_list.append(i)
+        i = parent[i]
+    return ancestors_list
+
+
+# 입력 처리 부분 (여기에)
+n = int(input())  # Number of nodes
+parent = [0 for _ in range(n + 1)]  # Parent list
+left = [0 for _ in range(n + 1)]  # Left list
+right = [0 for _ in range(n + 1)]  # Right list
+
+for _ in range(n):
+    p, l, r = map(int, input().split())
+    parent[l] = p
+    parent[r] = p
+    left[p] = l
+    right[p] = r
+
+
+# 전처리 코드 부분 (여기에)
+root = -1  # Root node
+for i in range(1, n + 1):
+    if is_root(i):
+        root = i
+        break
+
+#
+# 명령 처리 부분으로 아래는 수정 하지 말 것!
+#
 while True:
     cmd = input().split()
-    if cmd[0] == 'exit':
+    if cmd[0] == "exit":
         break
-    elif cmd[0] == 'preorder':
+    elif cmd[0] == "preorder":
         res = preorder(int(cmd[1]))
         print(f"  > preorder({int(cmd[1])}) = {res}")
-    elif cmd[0] == 'postorder':
+    elif cmd[0] == "postorder":
         res = postorder(int(cmd[1]))
         print(f"  > postorder({int(cmd[1])}) = {res}")
-    elif cmd[0] == 'depth':
+    elif cmd[0] == "depth":
         res = depth(int(cmd[1]))
         print(f"  > depth({int(cmd[1])}) = {res}")
-    elif cmd[0] == 'is_ancestor':
+    elif cmd[0] == "is_ancestor":
         res = is_ancestor(int(cmd[1]), int(cmd[2]))
         print(f"  > {int(cmd[1])} is {'an' if res else 'not an'} ancestor of {int(cmd[2])}")
-    elif cmd[0] == 'lca':
+    elif cmd[0] == "lca":
         res = lca(int(cmd[1]), int(cmd[2]))
         print(f"  > lca({int(cmd[1])}, {int(cmd[2])}) = {res}")
     else:
